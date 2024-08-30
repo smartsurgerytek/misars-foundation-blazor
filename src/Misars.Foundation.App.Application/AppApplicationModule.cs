@@ -12,6 +12,7 @@ using Volo.Abp.SettingManagement;
 using Volo.Abp.TextTemplateManagement;
 using Volo.Saas.Host;
 using Volo.FileManagement;
+using Volo.CmsKit;
 
 namespace Misars.Foundation.App;
 
@@ -32,6 +33,8 @@ namespace Misars.Foundation.App;
     typeof(TextTemplateManagementApplicationModule)
     )]
 [DependsOn(typeof(FileManagementApplicationModule))]
+    [DependsOn(typeof(CmsKitProApplicationModule))]
+    [DependsOn(typeof(CmsKitProCommonApplicationModule))]
     public class AppApplicationModule : AbpModule
 {
     public override void ConfigureServices(ServiceConfigurationContext context)

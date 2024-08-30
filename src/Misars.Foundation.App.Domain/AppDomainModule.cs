@@ -22,6 +22,7 @@ using Volo.Abp.Gdpr;
 using Volo.Abp.OpenIddict;
 using Volo.Abp.PermissionManagement.OpenIddict;
 using Volo.FileManagement;
+using Volo.CmsKit;
 
 namespace Misars.Foundation.App;
 
@@ -45,6 +46,7 @@ namespace Misars.Foundation.App;
     typeof(BlobStoringDatabaseDomainModule)
     )]
 [DependsOn(typeof(FileManagementDomainModule))]
+    [DependsOn(typeof(CmsKitProDomainModule))]
     public class AppDomainModule : AbpModule
 {
     public override void ConfigureServices(ServiceConfigurationContext context)

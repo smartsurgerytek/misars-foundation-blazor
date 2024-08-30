@@ -14,6 +14,7 @@ using Volo.Abp.TextTemplateManagement;
 using Volo.Abp.Gdpr;
 using Volo.Abp.OpenIddict;
 using Volo.FileManagement;
+using Volo.CmsKit;
 
 namespace Misars.Foundation.App;
 
@@ -33,6 +34,7 @@ namespace Misars.Foundation.App;
     typeof(TextTemplateManagementHttpApiModule)
     )]
 [DependsOn(typeof(FileManagementHttpApiModule))]
+    [DependsOn(typeof(CmsKitProHttpApiModule))]
     public class AppHttpApiModule : AbpModule
 {
     public override void ConfigureServices(ServiceConfigurationContext context)

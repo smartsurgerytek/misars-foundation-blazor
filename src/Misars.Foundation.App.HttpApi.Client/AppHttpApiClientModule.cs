@@ -13,6 +13,7 @@ using Volo.Saas.Host;
 using Volo.Abp.VirtualFileSystem;
 using Volo.Abp.Gdpr;
 using Volo.FileManagement;
+using Volo.CmsKit;
 
 namespace Misars.Foundation.App;
 
@@ -32,6 +33,8 @@ namespace Misars.Foundation.App;
     typeof(TextTemplateManagementHttpApiClientModule)
 )]
 [DependsOn(typeof(FileManagementHttpApiClientModule))]
+    [DependsOn(typeof(CmsKitProAdminHttpApiClientModule))]
+    [DependsOn(typeof(CmsKitProHttpApiClientModule))]
     public class AppHttpApiClientModule : AbpModule
 {
     public const string RemoteServiceName = "Default";

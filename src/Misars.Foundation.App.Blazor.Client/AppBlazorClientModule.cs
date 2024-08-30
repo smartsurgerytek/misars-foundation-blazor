@@ -27,6 +27,7 @@ using Volo.Abp.SettingManagement.Blazor.WebAssembly;
 using Volo.Abp.TextTemplateManagement.Blazor.WebAssembly;
 using Volo.Saas.Host.Blazor.WebAssembly;
 using Volo.FileManagement.Blazor.WebAssembly;
+using Volo.CmsKit.Pro.Admin.Blazor.WebAssembly;
 
 
 namespace Misars.Foundation.App.Blazor.Client;
@@ -46,6 +47,7 @@ namespace Misars.Foundation.App.Blazor.Client;
     typeof(TextTemplateManagementBlazorWebAssemblyModule)
 )]
 [DependsOn(typeof(FileManagementBlazorWebAssemblyModule))]
+    [DependsOn(typeof(CmsKitProAdminBlazorWebAssemblyModule))]
     public class AppBlazorClientModule : AbpModule
 {
     public override void ConfigureServices(ServiceConfigurationContext context)

@@ -23,6 +23,7 @@ using Volo.Saas.Tenants;
 using Volo.Abp.Gdpr;
 using Volo.Abp.OpenIddict.EntityFrameworkCore;
 using Volo.FileManagement.EntityFrameworkCore;
+using Volo.CmsKit.EntityFrameworkCore;
 
 namespace Misars.Foundation.App.EntityFrameworkCore;
 
@@ -213,5 +214,7 @@ public class AppDbContext :
             });
 
         }
-    }
+        builder.ConfigureCmsKitPro();
+            builder.ConfigureCmsKit();
+        }
 }

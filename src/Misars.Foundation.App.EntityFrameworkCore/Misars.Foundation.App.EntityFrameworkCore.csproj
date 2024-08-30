@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Volo.CmsKit.Pro.EntityFrameworkCore" Version="8.2.2" />
     <PackageReference Include="Volo.FileManagement.EntityFrameworkCore" Version="8.2.2" />
     <ProjectReference Include="..\Misars.Foundation.App.Domain\Misars.Foundation.App.Domain.csproj" />
     <PackageReference Include="Volo.Abp.EntityFrameworkCore.Sqlite" Version="8.2.2" />

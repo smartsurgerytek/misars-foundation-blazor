@@ -18,6 +18,7 @@ using Volo.Abp.BlobStoring.Database;
 using Volo.Abp.Gdpr;
 using Volo.Abp.GlobalFeatures;
 using Volo.FileManagement;
+using Volo.CmsKit;
 
 namespace Misars.Foundation.App;
 
@@ -37,6 +38,7 @@ namespace Misars.Foundation.App;
     typeof(BlobStoringDatabaseDomainSharedModule)
     )]
 [DependsOn(typeof(FileManagementDomainSharedModule))]
+    [DependsOn(typeof(CmsKitProDomainSharedModule))]
     public class AppDomainSharedModule : AbpModule
 {
     public override void PreConfigureServices(ServiceConfigurationContext context)

@@ -14,6 +14,7 @@
     <PackageReference Include="Blazorise.Components" Version="1.5.2" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.4" />
+    <PackageReference Include="Volo.CmsKit.Pro.Admin.Blazor.WebAssembly" Version="8.2.2" />
     <PackageReference Include="Volo.FileManagement.Blazor.WebAssembly" Version="8.2.2" />
   </ItemGroup>
 

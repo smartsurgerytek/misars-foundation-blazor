@@ -11,6 +11,8 @@ public static class AppGlobalFeatureConfigurator
     {
         OneTimeRunner.Run(() =>
         {
+            GlobalFeatureManager.Instance.Modules.CmsKit(x => x.EnableAll()); 
+            GlobalFeatureManager.Instance.Modules.CmsKitPro(x => x.EnableAll());
            /* You can configure (enable/disable) global features of the used modules here.
             * Please refer to the documentation to learn more about the Global Features System:
             * https://docs.abp.io/en/abp/latest/Global-Features

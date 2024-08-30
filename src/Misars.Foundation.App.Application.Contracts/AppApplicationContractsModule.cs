@@ -11,6 +11,7 @@ using Volo.Saas.Host;
 using Volo.Abp.Gdpr;
 using Volo.Abp.OpenIddict;
 using Volo.FileManagement;
+using Volo.CmsKit;
 
 namespace Misars.Foundation.App;
 
@@ -30,6 +31,8 @@ namespace Misars.Foundation.App;
     typeof(TextTemplateManagementApplicationContractsModule)
 )]
 [DependsOn(typeof(FileManagementApplicationContractsModule))]
+    [DependsOn(typeof(CmsKitProApplicationContractsModule))]
+    [DependsOn(typeof(CmsKitProCommonApplicationContractsModule))]
     public class AppApplicationContractsModule : AbpModule
 {
     public override void PreConfigureServices(ServiceConfigurationContext context)
