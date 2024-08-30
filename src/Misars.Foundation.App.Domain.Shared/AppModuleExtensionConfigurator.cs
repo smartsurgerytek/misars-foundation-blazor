@@ -8,7 +8,11 @@ namespace Misars.Foundation.App;
 public static class AppModuleExtensionConfigurator
 {
     private static readonly OneTimeRunner OneTimeRunner = new OneTimeRunner();
-
+    public static class MyConsts
+    {
+        public const int MaximumDescriptionLength = 100;
+        public const int MinimumDescriptionLength = 100;
+    }
     public static void Configure()
     {
         OneTimeRunner.Run(() =>
@@ -37,6 +41,43 @@ public static class AppModuleExtensionConfigurator
 
     private static void ConfigureExtraProperties()
     {
+        OneTimeRunner.Run(() =>
+        {
+            ObjectExtensionManager.Instance.Modules()
+                .ConfigureCmsKitPro(cmsKitPro =>
+                {
+                    cmsKitPro.ConfigurePoll(plan => // extend the Poll entity
+                    {
+                        plan.AddOrUpdateProperty<string>( //property type: string
+                        "PollDescription", //property name
+                        property => {
+                            //validation rules
+                            property.Attributes.Add(new RequiredAttribute()); //adds required attribute to the defined property
+
+                            //...other configurations for this property
+                        }
+                        );
+                    }); 
+
+                    cmsKitPro.ConfigureNewsletterRecord(newsletterRecord => // extend the NewsletterRecord entity
+                    {
+                        newsletterRecord.AddOrUpdateProperty<string>( //property type: string
+                        "NewsletterRecordDescription", //property name
+                        property => {
+                            //validation rules
+                            property.Attributes.Add(new RequiredAttribute()); //adds required attribute to the defined property
+                            property.Attributes.Add(
+                            new StringLengthAttribute(MyConsts.MaximumDescriptionLength) {
+                                MinimumLength = MyConsts.MinimumDescriptionLength
+                            }
+                            );
+
+                            //...other configurations for this property
+                        }
+                        );
+                    });     
+                });
+        });
         /* You can configure extra properties for the
          * entities defined in the modules used by your application.
          *
