@@ -1,0 +1,640 @@
+
+
+@page "/surgery-timetables"
+
+@attribute [Authorize(AppPermissions.SurgeryTimetables.Default)]
+@using Misars.Foundation.App.SurgeryTimetables
+@using Misars.Foundation.App.Localization
+@using Misars.Foundation.App.Shared
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.Extensions.Localization
+@using Microsoft.AspNetCore.Components.Web
+@using Blazorise
+@using Blazorise.Components
+@using Blazorise.DataGrid
+@using Volo.Abp.BlazoriseUI
+@using Volo.Abp.BlazoriseUI.Components
+@using Volo.Abp.ObjectMapping
+@using Volo.Abp.AspNetCore.Components.Messages
+@using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
+
+@using Misars.Foundation.App.Permissions
+@using Volo.Abp.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components
+@using Volo.Abp.Http.Client
+@inherits AppComponentBase
+@inject ISurgeryTimetablesAppService SurgeryTimetablesAppService
+
+@inject IUiMessageService UiMessageService
+@inject AbpBlazorMessageLocalizerHelper<AppResource> LH
+@inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
+@inject NavigationManager NavigationManager
+
+@* ************************* PAGE HEADER ************************* *@
+<PageHeader Title="@L["SurgeryTimetables"]" BreadcrumbItems="BreadcrumbItems" Toolbar="Toolbar">
+
+</PageHeader>
+
+@* ************************* SEARCH ************************* *@
+<Card>
+    <CardBody>
+@*//<suite-custom-code-block-1>*@
+@*//</suite-custom-code-block-1>*@
+        <Form id="SurgeryTimetableSearchForm" class="mb-3">
+            <Addons>
+                <Addon AddonType="AddonType.Body">
+                    <TextEdit @bind-Text="@Filter.FilterText"
+                              Autofocus="true"
+                              Placeholder="@L["Search"]">
+                    </TextEdit>
+                </Addon>
+                <Addon AddonType="AddonType.End">
+                    <SubmitButton Form="SurgeryTimetableSearchForm" Clicked="GetSurgeryTimetablesAsync">
+                        <Icon Name="IconName.Search" Class="me-1"></Icon>@L["Search"]
+                    </SubmitButton>
+                </Addon>
+            </Addons>
+        </Form>
+        
+        <Row Class="mt-3 mb-3"> 
+            <div class="col-md-12">
+                <a href="javascript:;" class="text-decoration-none" @onclick="() => ShowAdvancedFilters = !ShowAdvancedFilters">@L["SeeAdvancedFilters"]</a>
+            </div>
+        </Row>
+        
+        <div style="display: @(!ShowAdvancedFilters ? "none" : "block")">
+            <Row>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["Minstartdate"]</FieldLabel>
+                        <DatePicker TValue="DateTime?"
+            InputMode="DateInputMode.Date"
+            Date="@Filter.startdateMin"
+            DateChanged="@OnstartdateMinChangedAsync"
+            Placeholder="@string.Empty" />                       
+                    </Field>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["Maxstartdate"]</FieldLabel>
+                        <DatePicker TValue="DateTime?"
+            InputMode="DateInputMode.Date"
+            Date="@Filter.startdateMax"
+            DateChanged="@OnstartdateMaxChangedAsync"
+            Placeholder="@string.Empty" />                       
+                    </Field>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["Minenddate"]</FieldLabel>
+                        <DatePicker TValue="DateTime?"
+            InputMode="DateInputMode.Date"
+            Date="@Filter.enddateMin"
+            DateChanged="@OnenddateMinChangedAsync"
+            Placeholder="@string.Empty" />                       
+                    </Field>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["Maxenddate"]</FieldLabel>
+                        <DatePicker TValue="DateTime?"
+            InputMode="DateInputMode.Date"
+            Date="@Filter.enddateMax"
+            DateChanged="@OnenddateMaxChangedAsync"
+            Placeholder="@string.Empty" />                       
+                    </Field>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["Time"]</FieldLabel>
+                        <TextEdit Text="@Filter.Time" TextChanged="@OnTimeChangedAsync" />                       
+                    </Field>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["Department"]</FieldLabel>
+                        <TextEdit Text="@Filter.Department" TextChanged="@OnDepartmentChangedAsync" />                       
+                    </Field>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["Diagnosis"]</FieldLabel>
+                        <TextEdit Text="@Filter.Diagnosis" TextChanged="@OnDiagnosisChangedAsync" />                       
+                    </Field>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["SurgicalMethod"]</FieldLabel>
+                        <TextEdit Text="@Filter.SurgicalMethod" TextChanged="@OnSurgicalMethodChangedAsync" />                       
+                    </Field>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["notes"]</FieldLabel>
+                        <TextEdit Text="@Filter.notes" TextChanged="@OnnotesChangedAsync" />                       
+                    </Field>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["Doctor"]</FieldLabel>
+                        <Select TValue="Guid?"
+		SelectedValue="@Filter.DoctorId"
+		SelectedValueChanged="@OnDoctorIdChangedAsync">
+
+<SelectItem></SelectItem>
+
+@foreach(var item in DoctorsCollection)
+{
+	<SelectItem TValue="Guid?" Value="@item.Id">
+		@item.DisplayName
+	</SelectItem>
+}
+
+</Select>                       
+                    </Field>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["Patient"]</FieldLabel>
+                        <Select TValue="Guid?"
+		SelectedValue="@Filter.PatientId"
+		SelectedValueChanged="@OnPatientIdChangedAsync">
+
+<SelectItem></SelectItem>
+
+@foreach(var item in PatientsCollection)
+{
+	<SelectItem TValue="Guid?" Value="@item.Id">
+		@item.DisplayName
+	</SelectItem>
+}
+
+</Select>                       
+                    </Field>
+                </Column>
+            </Row>
+@*//<suite-custom-code-block-2>*@
+@*//</suite-custom-code-block-2>*@
+        </div>
+
+@*//<suite-custom-code-block-3>*@
+@*//</suite-custom-code-block-3>*@
+    </CardBody>
+</Card>
+
+@* ************************* DATA GRID ************************* *@
+<Card>
+    <CardBody>        
+        @if (SelectedSurgeryTimetables.Any())
+        {
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                @if (AllSurgeryTimetablesSelected)
+                {
+                    <p class="lead mb-0">
+                        @L["AllItemsAreSelected", TotalCount]
+                    </p>
+                }
+                else
+                {
+                    <p class="lead mb-0">
+                        @if (SelectedSurgeryTimetables.Count > 1)
+                        {
+                            @L["NumberOfItemsOnThisPageAreSelected", SelectedSurgeryTimetables.Count]
+                        }
+                        else
+                        {
+                            @L["OneItemOnThisPageIsSelected"]
+                        }
+                    </p>
+                }
+                    
+                <div>
+                    @if ((SelectedSurgeryTimetables.Count == PageSize || SelectedSurgeryTimetables.Count == SurgeryTimetableList.Count) && TotalCount > SelectedSurgeryTimetables.Count)
+                    {
+                        if (!AllSurgeryTimetablesSelected)
+                        {
+                            <Button Clicked="SelectAllItems" Class="mx-1 btn-outline-secondary">@L["SelectAllItems", TotalCount]</Button>
+                        }
+                        else
+                        {
+                            <Button Clicked="ClearSelection" Class="mx-1 btn-outline-secondary">@L["ClearSelection"]</Button>
+                        }
+                    }
+                    
+                    <Button Color="Color.Danger" Class="mx-1" Size="Size.Medium" Clicked="DeleteSelectedSurgeryTimetablesAsync">
+                        <Icon Name="@IconName.Delete" /> @L["Delete"]
+                    </Button>
+                </div>
+            </div>
+            
+            <hr class="my-1 mx-0"/>
+        }
+        <DataGrid TItem="SurgeryTimetableWithNavigationPropertiesDto"
+                  Data="SurgeryTimetableList"
+                  
+                  SelectionMode="DataGridSelectionMode.Multiple"
+                  SelectedRows="SelectedSurgeryTimetables"
+                  RowSelectable="@((args) => CanDeleteSurgeryTimetable)"
+                  SelectedRowsChanged="SelectedSurgeryTimetableRowsChanged"
+                  
+                  
+                  
+                  ReadData="OnDataGridReadAsync"
+                  TotalItems="TotalCount"
+                  ShowPager="true"
+                  Responsive="true"
+                  PageSize="PageSize"
+                  Class="datagrid-detail">
+            <LoadingTemplate>
+                <Row Class="w-100 align-items-center" Style="height: 150px;">
+                    <Column>
+                       <RadarSpinner />
+                    </Column>
+                </Row>
+            </LoadingTemplate>
+            <EmptyTemplate>
+                <Row Class="w-100 align-items-center" Style="height: 150px;">
+                    <Column>
+                        <Heading Size="HeadingSize.Is4" TextAlignment="TextAlignment.Center">@L["NoDataAvailable"]</Heading>
+                    </Column>
+                </Row>
+            </EmptyTemplate>   
+            <DataGridColumns>
+                
+                @if (CanDeleteSurgeryTimetable && SurgeryTimetableList.Any())
+                {
+                    <DataGridMultiSelectColumn TItem="SurgeryTimetableWithNavigationPropertiesDto" DisplayOrder="-1" Width="30px"></DataGridMultiSelectColumn>
+                }
+                
+                <DataGridEntityActionsColumn TItem="SurgeryTimetableWithNavigationPropertiesDto" @ref="@EntityActionsColumn">
+                    <DisplayTemplate>
+                        <EntityActions TItem="SurgeryTimetableWithNavigationPropertiesDto" EntityActionsColumn="@EntityActionsColumn">
+                            <EntityAction TItem="SurgeryTimetableWithNavigationPropertiesDto"
+                                          Visible="@CanEditSurgeryTimetable"
+                                          Clicked="async () => await OpenEditSurgeryTimetableModalAsync(context)"
+                                          Text="@L["Edit"]"></EntityAction>
+                            <EntityAction TItem="SurgeryTimetableWithNavigationPropertiesDto"
+                                          Visible="@CanDeleteSurgeryTimetable"
+                                          Clicked="() => DeleteSurgeryTimetableAsync(context)"
+                                          ConfirmationMessage="@(()=> L["DeleteConfirmationMessage"])"
+                                          Text="@L["Delete"]"></EntityAction>
+@*//<suite-custom-code-block-4>*@
+@*//</suite-custom-code-block-4>*@
+                        </EntityActions>
+                    </DisplayTemplate>
+                </DataGridEntityActionsColumn>
+               
+              <DataGridColumn TItem="SurgeryTimetableWithNavigationPropertiesDto"
+                      Field="SurgeryTimetable.startdate"
+                      Caption="@L["startdate"]">
+                  <DisplayTemplate>
+                        @context.SurgeryTimetable.startdate.ToShortDateString()
+                  </DisplayTemplate>
+              </DataGridColumn>
+
+              <DataGridColumn TItem="SurgeryTimetableWithNavigationPropertiesDto"
+                      Field="SurgeryTimetable.enddate"
+                      Caption="@L["enddate"]">
+                  <DisplayTemplate>
+                        @context.SurgeryTimetable.enddate.ToShortDateString()
+                  </DisplayTemplate>
+              </DataGridColumn>
+
+              <DataGridColumn TItem="SurgeryTimetableWithNavigationPropertiesDto"
+                      Field="SurgeryTimetable.Time"
+                      Caption="@L["Time"]">
+              </DataGridColumn>
+
+              <DataGridColumn TItem="SurgeryTimetableWithNavigationPropertiesDto"
+                      Field="SurgeryTimetable.Department"
+                      Caption="@L["Department"]">
+              </DataGridColumn>
+
+              <DataGridColumn TItem="SurgeryTimetableWithNavigationPropertiesDto"
+                      Field="SurgeryTimetable.Diagnosis"
+                      Caption="@L["Diagnosis"]">
+              </DataGridColumn>
+
+              <DataGridColumn TItem="SurgeryTimetableWithNavigationPropertiesDto"
+                      Field="SurgeryTimetable.SurgicalMethod"
+                      Caption="@L["SurgicalMethod"]">
+              </DataGridColumn>
+
+              <DataGridColumn TItem="SurgeryTimetableWithNavigationPropertiesDto"
+                      Field="SurgeryTimetable.notes"
+                      Caption="@L["notes"]">
+              </DataGridColumn>
+
+              <DataGridColumn TItem="SurgeryTimetableWithNavigationPropertiesDto"
+                      Field="Doctor.name"
+                      Caption="@L["Doctor"]">
+              </DataGridColumn>
+
+              <DataGridColumn TItem="SurgeryTimetableWithNavigationPropertiesDto"
+                      Field="Patient.name"
+                      Caption="@L["Patient"]">
+              </DataGridColumn>
+
+            </DataGridColumns>
+            
+            
+        </DataGrid>
+    </CardBody>
+</Card>
+
+@* ************************* CREATE MODAL ************************* *@
+<Modal @ref="CreateSurgeryTimetableModal" Closing="@CreateSurgeryTimetableModal.CancelClosingModalWhenFocusLost">
+    <ModalContent Centered="true">
+@*//<suite-custom-code-block-5>*@
+@*//</suite-custom-code-block-5>*@
+        <Form id="CreateSurgeryTimetableForm">
+            <ModalHeader>
+                <ModalTitle>@L["NewSurgeryTimetable"]</ModalTitle>
+                <CloseButton Clicked="CloseCreateSurgeryTimetableModalAsync" />
+            </ModalHeader>
+            <ModalBody>
+                <Validations @ref="@NewSurgeryTimetableValidations"
+                            Mode="ValidationMode.Auto"
+                            Model="@NewSurgeryTimetable"
+                            ValidateOnLoad="false">
+                    
+                    
+                    <Validation MessageLocalizer="@LH.Localize">
+                        <Field>
+                            <FieldLabel>@L["startdate"]</FieldLabel>
+                            <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@NewSurgeryTimetable.startdate" >
+                               <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </DateEdit>
+                        </Field>
+                    </Validation>
+
+
+                    <Validation MessageLocalizer="@LH.Localize">
+                        <Field>
+                            <FieldLabel>@L["enddate"]</FieldLabel>
+                            <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@NewSurgeryTimetable.enddate" >
+                               <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </DateEdit>
+                        </Field>
+                    </Validation>
+
+
+                    <Validation MessageLocalizer="@LH.Localize">
+                        <Field>
+                            <FieldLabel>@L["Time"]</FieldLabel>
+                            <TextEdit @bind-Text="@NewSurgeryTimetable.Time" MaxLength="SurgeryTimetableConsts.TimeMaxLength" >
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </TextEdit>
+                        </Field>
+                    </Validation>
+
+
+                    <Validation MessageLocalizer="@LH.Localize">
+                        <Field>
+                            <FieldLabel>@L["Department"]</FieldLabel>
+                            <TextEdit @bind-Text="@NewSurgeryTimetable.Department"  >
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </TextEdit>
+                        </Field>
+                    </Validation>
+
+
+                    <Validation MessageLocalizer="@LH.Localize">
+                        <Field>
+                            <FieldLabel>@L["Diagnosis"]</FieldLabel>
+                            <TextEdit @bind-Text="@NewSurgeryTimetable.Diagnosis" MaxLength="SurgeryTimetableConsts.DiagnosisMaxLength" >
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </TextEdit>
+                        </Field>
+                    </Validation>
+
+
+                    <Validation MessageLocalizer="@LH.Localize">
+                        <Field>
+                            <FieldLabel>@L["SurgicalMethod"]</FieldLabel>
+                            <TextEdit @bind-Text="@NewSurgeryTimetable.SurgicalMethod" MaxLength="SurgeryTimetableConsts.SurgicalMethodMaxLength" >
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </TextEdit>
+                        </Field>
+                    </Validation>
+
+
+                    <Validation MessageLocalizer="@LH.Localize">
+                        <Field>
+                            <FieldLabel>@L["notes"]</FieldLabel>
+                            <TextEdit @bind-Text="@NewSurgeryTimetable.notes" MaxLength="SurgeryTimetableConsts.notesMaxLength" >
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </TextEdit>
+                        </Field>
+                    </Validation>
+
+
+                    <Field>
+                        <FieldLabel>@L["Doctor"]</FieldLabel>
+                        <Select TValue="Guid?" @bind-SelectedValue="@NewSurgeryTimetable.DoctorId">
+                            <SelectItem TValue="Guid?" Value="null"></SelectItem>
+                            @foreach (var doctor in DoctorsCollection)
+                            {
+                                <SelectItem TValue="Guid?" Value="@(doctor.Id)">
+                                    @(doctor.DisplayName)
+                                </SelectItem>
+                            }
+                        </Select>
+                    </Field>
+
+
+                    <Field>
+                        <FieldLabel>@L["Patient"]</FieldLabel>
+                        <Select TValue="Guid?" @bind-SelectedValue="@NewSurgeryTimetable.PatientId">
+                            <SelectItem TValue="Guid?" Value="null"></SelectItem>
+                            @foreach (var patient in PatientsCollection)
+                            {
+                                <SelectItem TValue="Guid?" Value="@(patient.Id)">
+                                    @(patient.DisplayName)
+                                </SelectItem>
+                            }
+                        </Select>
+                    </Field>
+
+
+                    
+                    
+                </Validations>
+            </ModalBody>
+            <ModalFooter>
+                <Button Color="Color.Secondary"
+                        Clicked="CloseCreateSurgeryTimetableModalAsync">
+                    @L["Cancel"]
+                </Button>
+                <SubmitButton Form="CreateSurgeryTimetableForm" Clicked="CreateSurgeryTimetableAsync"/>
+@*//<suite-custom-code-block-6>*@
+@*//</suite-custom-code-block-6>*@
+            </ModalFooter>
+        </Form>
+@*//<suite-custom-code-block-7>*@
+@*//</suite-custom-code-block-7>*@
+    </ModalContent>
+</Modal>
+
+@* ************************* EDIT MODAL ************************* *@
+<Modal @ref="EditSurgeryTimetableModal" Closing="@EditSurgeryTimetableModal.CancelClosingModalWhenFocusLost">
+    <ModalContent Centered="true">
+@*//<suite-custom-code-block-8>*@
+@*//</suite-custom-code-block-8>*@
+        <Form id="EditSurgeryTimetableForm">
+            <ModalHeader>
+                <ModalTitle>@L["Update"]</ModalTitle>
+                <CloseButton Clicked="CloseEditSurgeryTimetableModalAsync" />
+            </ModalHeader>
+            <ModalBody>
+                <Validations @ref="@EditingSurgeryTimetableValidations"
+                            Mode="ValidationMode.Auto"
+                            Model="@EditingSurgeryTimetable"
+                            ValidateOnLoad="false">
+                    
+                    
+                    <Validation MessageLocalizer="@LH.Localize">
+                        <Field>
+                            <FieldLabel>@L["startdate"]</FieldLabel>
+                            <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@EditingSurgeryTimetable.startdate" >
+                               <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </DateEdit>
+                        </Field>
+                    </Validation>
+
+
+                    <Validation MessageLocalizer="@LH.Localize">
+                        <Field>
+                            <FieldLabel>@L["enddate"]</FieldLabel>
+                            <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@EditingSurgeryTimetable.enddate" >
+                               <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </DateEdit>
+                        </Field>
+                    </Validation>
+
+
+                    <Validation MessageLocalizer="@LH.Localize">
+                        <Field>
+                            <FieldLabel>@L["Time"]</FieldLabel>
+                            <TextEdit @bind-Text="@EditingSurgeryTimetable.Time" MaxLength="SurgeryTimetableConsts.TimeMaxLength" >
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </TextEdit>
+                        </Field>
+                    </Validation>
+
+
+                    <Validation MessageLocalizer="@LH.Localize">
+                        <Field>
+                            <FieldLabel>@L["Department"]</FieldLabel>
+                            <TextEdit @bind-Text="@EditingSurgeryTimetable.Department"  >
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </TextEdit>
+                        </Field>
+                    </Validation>
+
+
+                    <Validation MessageLocalizer="@LH.Localize">
+                        <Field>
+                            <FieldLabel>@L["Diagnosis"]</FieldLabel>
+                            <TextEdit @bind-Text="@EditingSurgeryTimetable.Diagnosis" MaxLength="SurgeryTimetableConsts.DiagnosisMaxLength" >
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </TextEdit>
+                        </Field>
+                    </Validation>
+
+
+                    <Validation MessageLocalizer="@LH.Localize">
+                        <Field>
+                            <FieldLabel>@L["SurgicalMethod"]</FieldLabel>
+                            <TextEdit @bind-Text="@EditingSurgeryTimetable.SurgicalMethod" MaxLength="SurgeryTimetableConsts.SurgicalMethodMaxLength" >
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </TextEdit>
+                        </Field>
+                    </Validation>
+
+
+                    <Validation MessageLocalizer="@LH.Localize">
+                        <Field>
+                            <FieldLabel>@L["notes"]</FieldLabel>
+                            <TextEdit @bind-Text="@EditingSurgeryTimetable.notes" MaxLength="SurgeryTimetableConsts.notesMaxLength" >
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </TextEdit>
+                        </Field>
+                    </Validation>
+
+
+                    <Field>
+                        <FieldLabel>@L["Doctor"]</FieldLabel>
+                        <Select TValue="Guid?" @bind-SelectedValue="@EditingSurgeryTimetable.DoctorId">
+                            <SelectItem TValue="Guid?" Value="null"></SelectItem>
+                            @foreach (var doctor in DoctorsCollection)
+                            {
+                                <SelectItem TValue="Guid?" Value="@(doctor.Id)">
+                                    @(doctor.DisplayName)
+                                </SelectItem>
+                            }
+                        </Select>
+                    </Field>
+
+
+                    <Field>
+                        <FieldLabel>@L["Patient"]</FieldLabel>
+                        <Select TValue="Guid?" @bind-SelectedValue="@EditingSurgeryTimetable.PatientId">
+                            <SelectItem TValue="Guid?" Value="null"></SelectItem>
+                            @foreach (var patient in PatientsCollection)
+                            {
+                                <SelectItem TValue="Guid?" Value="@(patient.Id)">
+                                    @(patient.DisplayName)
+                                </SelectItem>
+                            }
+                        </Select>
+                    </Field>
+
+
+                    
+                    
+                </Validations>
+            </ModalBody>
+            <ModalFooter>
+                <Button Color="Color.Secondary"
+                        Clicked="CloseEditSurgeryTimetableModalAsync">
+                    @L["Cancel"]
+                </Button>
+                <SubmitButton Form="EditSurgeryTimetableForm" Clicked="UpdateSurgeryTimetableAsync" />
+@*//<suite-custom-code-block-9>*@
+@*//</suite-custom-code-block-9>*@
+            </ModalFooter>
+        </Form>
+@*//<suite-custom-code-block-10>*@
+@*//</suite-custom-code-block-10>*@
+    </ModalContent>
+</Modal>
+
