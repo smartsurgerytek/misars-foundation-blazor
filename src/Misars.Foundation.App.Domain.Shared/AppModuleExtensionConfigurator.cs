@@ -7,6 +7,12 @@ namespace Misars.Foundation.App;
 
 public static class AppModuleExtensionConfigurator
 {
+    public static class MyConsts
+    {
+        public const int MaximumDescriptionLength = 100;
+        public const int MinimumDescriptionLength = 100;
+    }
+
     private static readonly OneTimeRunner OneTimeRunner = new OneTimeRunner();
 
     public static void Configure()
@@ -20,6 +26,7 @@ public static class AppModuleExtensionConfigurator
 
     private static void ConfigureExistingProperties()
     {
+        
         /* You can change max lengths for properties of the
          * entities defined in the modules used by your application.
          *
@@ -35,37 +42,45 @@ public static class AppModuleExtensionConfigurator
          */
     }
 
-    private static void ConfigureExtraProperties()
+        public static void ConfigureExtraProperties()
     {
-        /* You can configure extra properties for the
-         * entities defined in the modules used by your application.
-         *
-         * This class can be used to define these extra properties
-         * with a high level, easy to use API.
-         *
-         * Example: Add a new property to the user entity of the identity module
+        OneTimeRunner.Run(() =>
+        {
+            ObjectExtensionManager.Instance.Modules()
+                .ConfigureCmsKitPro(cmsKitPro =>
+                {
+                    cmsKitPro.ConfigurePoll(plan => // extend the Poll entity
+                    {
+                        plan.AddOrUpdateProperty<string>( //property type: string
+                        "PollDescription", //property name
+                        property => {
+                            //validation rules
+                            property.Attributes.Add(new RequiredAttribute()); //adds required attribute to the defined property
 
-           ObjectExtensionManager.Instance.Modules()
-              .ConfigureIdentity(identity =>
-              {
-                  identity.ConfigureUser(user =>
-                  {
-                      user.AddOrUpdateProperty<string>( //property type: string
-                          "SocialSecurityNumber", //property name
-                          property =>
-                          {
-                              //validation rules
-                              property.Attributes.Add(new RequiredAttribute());
-                              property.Attributes.Add(new StringLengthAttribute(64) {MinimumLength = 4});
+                            //...other configurations for this property
+                        }
+                        );
+                    }); 
 
-                              //...other configurations for this property
-                          }
-                      );
-                  });
-              });
+                    cmsKitPro.ConfigureNewsletterRecord(newsletterRecord => // extend the NewsletterRecord entity
+                    {
+                        newsletterRecord.AddOrUpdateProperty<string>( //property type: string
+                        "NewsletterRecordDescription", //property name
+                        property => {
+                            //validation rules
+                            property.Attributes.Add(new RequiredAttribute()); //adds required attribute to the defined property
+                            property.Attributes.Add(
+                            new StringLengthAttribute(MyConsts.MaximumDescriptionLength) {
+                                MinimumLength = MyConsts.MinimumDescriptionLength
+                            }
+                            );
 
-         * See the documentation for more:
-         * https://docs.abp.io/en/abp/latest/Module-Entity-Extensions
-         */
+                            //...other configurations for this property
+                        }
+                        );
+                    });     
+                });
+        });
     }
+
 }
